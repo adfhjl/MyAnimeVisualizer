@@ -10,11 +10,7 @@ export default function createAbstractGraphPNG(data: MyAnimeListData, path: stri
 	// console.log('Earliest:', startedAnimes.at(0)!.my_start_date);
 	// console.log('Latest:', startedAnimes.at(-1)!.my_start_date);
 
-
-
 	const imageHeight = startedAnimes.length;
-
-	
 	
 	const nextMonday = new Date();
 	nextMonday.setDate(nextMonday.getDate() + (((1 + 7 - nextMonday.getDay()) % 7) || 7));
