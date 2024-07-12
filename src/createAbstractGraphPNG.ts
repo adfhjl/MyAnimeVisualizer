@@ -39,12 +39,12 @@ export default function createAbstractGraphPNG(data: MyAnimeListData, path: stri
 	const image = make(imageWidth, imageHeight);
 	drawImage(image, startedAnimes, minWeek);
 
-	encodePNGToStream(image, createWriteStream('out.png'))
+	encodePNGToStream(image, createWriteStream(path))
 	.then(() => {
-    console.log("Wrote out the png file to out.png");
+    console.log(`Successfully created ${path}`);
   })
   .catch((e) => {
-    console.log("There was an error writing");
+    console.error(`Error generating file ${path}: ${e}`);
   });
 }
 

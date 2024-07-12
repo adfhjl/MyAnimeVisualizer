@@ -2,9 +2,30 @@ import parseFile from "./parsing";
 import createAbstractGraphPNG from "./createAbstractGraphPNG";
 
 function main() {
-	const data = parseFile('data.xml').myanimelist;
+	const input = new Array<string>();
 
-	createAbstractGraphPNG(data, 'out.png');
+	// If an argument was given to the program
+	if (process.argv.length > 2) {
+		input.push(...process.argv.slice(2));
+	} else {
+		input.push('data.xml');
+	}
+
+	input.forEach((path) => {
+		try {
+			var data = parseFile(path).myanimelist;
+		} catch (e) {
+			console.error(`Error parsing file ${path}: ${e}`);
+			return ;
+		}
+
+		const index = path.lastIndexOf('.');
+		if (index !== -1) {
+			path = path.slice(0, index);
+		}
+
+		createAbstractGraphPNG(data, path + 'Abstract.png');
+	});
 }
 
 main();
