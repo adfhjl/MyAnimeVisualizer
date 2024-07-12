@@ -1,0 +1,1 @@
+console.log(new Date('2018-10-19').getTime() - new Date(0).getTime());

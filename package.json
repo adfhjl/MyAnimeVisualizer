@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@types/node": "^20.14.10",
+    "fast-xml-parser": "^4.4.0",
+    "jpeg-js": "^0.4.4",
+    "pureimage": "^0.4.13"
+  }
+}
