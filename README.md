@@ -2,6 +2,6 @@
 A simple visualizer for your MyAnimeList .xml file
 
 # Usage
-`npx tsc main.ts --lib es6`
+`npx tsc src\main.ts --outDir dist\ --lib es6`
 
-`node main.js`
+`node dist\main.js data.xml`
