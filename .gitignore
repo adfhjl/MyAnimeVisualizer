@@ -2,4 +2,5 @@
 !src/
 !package.json
 !package-lock.json
+!README.md
 !.gitignore
