@@ -1,5 +1,6 @@
 import parseFile from "./parsing";
 import createAbstractGraphPNG from "./createAbstractGraphPNG";
+import createTimelinePNG from "./createTimelinePNG";
 
 function main() {
 	const input = new Array<string>();
@@ -25,6 +26,7 @@ function main() {
 		}
 
 		createAbstractGraphPNG(data, path + 'Abstract.png');
+		createTimelinePNG(data, path + 'Timeline.png');
 	});
 }
 
