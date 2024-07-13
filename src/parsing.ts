@@ -15,9 +15,18 @@ export default function parseFile(path: string): parsedXML {
 	}
 
 	data.myanimelist.anime.forEach((anime: any) => {
+		// console.log(anime);
 		anime.my_status = convertToStatusEnum(anime.my_status);
 		anime.my_start_date = fixUnknownDate(anime.my_start_date);
 		anime.my_finish_date = fixUnknownDate(anime.my_finish_date);
+		for (let i = 0; i < anime.series_title.length; ++i) {
+			let ch = anime.series_title.charCodeAt(i);
+			if (
+					!(ch >= 32 && ch <= 126)
+			) {
+					console.warn(`Warning: '${anime.series_title}' has special character '${anime.series_title.at(i)}', this may not get printed onto the image correctly`);
+			}
+	}
 	});
 
 	return data;
