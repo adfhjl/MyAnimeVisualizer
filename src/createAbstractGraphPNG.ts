@@ -28,10 +28,6 @@ export default function createAbstractGraphPNG(data: MyAnimeListData, path: stri
 	const imageWidth = maxWeek - minWeek;
 	// console.log(imageWidth, imageHeight);
 
-	// const imageWidth = data.anime
-	// 	.filter((anime) => new Date(anime.my_start_date).getTime() !== new Date('0').getTime())
-	// 	.at(0)!.my_start_date;
-
 	const image = make(imageWidth, imageHeight);
 	drawImage(image, startedAnimes, minWeek);
 
@@ -54,7 +50,6 @@ function drawImage(image: Bitmap, animes: AnimeInfo[], minWeek: number) {
 		const startX = week - minWeek;
 		// console.log('Weeknumber of anime:', week);
 		
-		
 		const mondayAfterAnimeEnd = new Date(new Date(anime.my_finish_date).getTime() === new Date(0).getTime() ? (anime.my_status !== STATUS.Dropped && anime.my_status !== STATUS.On_Hold ? new Date() : anime.my_start_date) : anime.my_finish_date);
 		mondayAfterAnimeEnd.setDate(mondayAfterAnimeEnd.getDate() + (((1 + 7 - mondayAfterAnimeEnd.getDay()) % 7) || 7));
 		
@@ -69,7 +64,6 @@ function drawImage(image: Bitmap, animes: AnimeInfo[], minWeek: number) {
 		// console.log(`(${index}) Drawing ${anime.series_title}`);
 		context.fillRect(startX, index, endWeek - minWeek - startX, 1);
 	})
-	// context.fillRect(0, 0, 100, 100);
 }
 
 function getColor(status: STATUS): string {
