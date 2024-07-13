@@ -19,6 +19,13 @@ export default function parseFile(path: string): parsedXML {
 		anime.my_status = convertToStatusEnum(anime.my_status);
 		anime.my_start_date = fixUnknownDate(anime.my_start_date);
 		anime.my_finish_date = fixUnknownDate(anime.my_finish_date);
+		if (anime.my_status === STATUS.Watching && anime.my_finish_date === 0) {
+			anime.my_finish_date = new Date().toLocaleDateString(undefined, {
+				year: 'numeric',
+				month: 'numeric',
+				day: 'numeric',
+			}).replace('/', '-');
+		}
 		for (let i = 0; i < anime.series_title.length; ++i) {
 			let ch = anime.series_title.charCodeAt(i);
 			if (

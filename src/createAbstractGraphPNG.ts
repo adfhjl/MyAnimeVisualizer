@@ -21,6 +21,7 @@ export default function createAbstractGraphPNG(data: MyAnimeListData, path: stri
 			)
 		);
 	});
+	// startedAnimes.splice(0, 2);
 	// console.log('Earliest:', startedAnimes.at(0)!.my_start_date);
 	// console.log('Latest:', startedAnimes.at(-1)!.my_start_date);
 
@@ -64,7 +65,7 @@ function drawImage(image: Bitmap, animes: AnimeInfo[], minWeek: number) {
 		const startX = week - minWeek;
 		// console.log('Weeknumber of anime:', week);
 		
-		const mondayAfterAnimeEnd = new Date(new Date(anime.my_finish_date).getTime() === new Date(0).getTime() ? (anime.my_status !== STATUS.Dropped && anime.my_status !== STATUS.On_Hold ? new Date() : anime.my_start_date) : anime.my_finish_date);
+		const mondayAfterAnimeEnd = new Date(new Date(anime.my_finish_date).getTime() === new Date(0).getTime() ? anime.my_start_date : anime.my_finish_date);
 		mondayAfterAnimeEnd.setDate(mondayAfterAnimeEnd.getDate() + (((1 + 7 - mondayAfterAnimeEnd.getDay()) % 7) || 7));
 		
 		const endWeek = Math.floor(mondayAfterAnimeEnd.getTime() / (1000 * 60 * 60 * 24 * 7));
