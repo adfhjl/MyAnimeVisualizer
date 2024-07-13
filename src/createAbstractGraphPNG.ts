@@ -5,8 +5,22 @@ import { AnimeInfo, MyAnimeListData, STATUS } from "./types";
 export default function createAbstractGraphPNG(data: MyAnimeListData, path: string) {
 	const startedAnimes = data.anime.filter((anime) => new Date(anime.my_start_date).getTime() !== new Date(0).getTime());
 	
-	startedAnimes.sort((a, b) => new Date(a.my_start_date).getTime() - new Date(b.my_start_date).getTime());
-	// startedAnimes.splice(0, 2);
+	startedAnimes.sort((a, b) => {
+		const aStart = new Date(a.my_start_date);
+		aStart.setDate(aStart.getDate() + (((1 + 7 - aStart.getDay()) % 7) || 7));
+		const bStart = new Date(b.my_start_date);
+		bStart.setDate(bStart.getDate() + (((1 + 7 - bStart.getDay()) % 7) || 7));
+		const aEnd = new Date(a.my_finish_date);
+		aEnd.setDate(aEnd.getDate() + (((1 + 7 - aEnd.getDay()) % 7) || 7));
+		const bEnd = new Date(b.my_finish_date);
+		bEnd.setDate(bEnd.getDate() + (((1 + 7 - bEnd.getDay()) % 7) || 7));
+		return (
+			aStart.getTime() > bStart.getTime() ? 1 :
+			(aStart.getTime() === bStart.getTime() && aEnd.getTime() < bEnd.getTime() ? 1 : 
+				(aStart.getTime() === bStart.getTime() && aEnd.getTime() === bEnd.getTime() ? 0 : -1)
+			)
+		);
+	});
 	// console.log('Earliest:', startedAnimes.at(0)!.my_start_date);
 	// console.log('Latest:', startedAnimes.at(-1)!.my_start_date);
 
