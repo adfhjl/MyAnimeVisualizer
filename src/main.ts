@@ -26,6 +26,7 @@ function main() {
 		}
 
 		createAbstractGraphPNG(data, path + 'Abstract.png');
+		// TODO: Make a way to display data in other length then weeks
 		createTimelinePNG(data, path + 'Timeline.png');
 	});
 }

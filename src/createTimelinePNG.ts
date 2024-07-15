@@ -1,6 +1,6 @@
 import { createWriteStream } from "fs";
 import { Bitmap, Context, encodePNGToStream, make, registerFont } from "pureimage";
-import { MyAnimeListData, STATUS } from "./types"
+import { AnimeInfo, MyAnimeListData, STATUS } from "./types"
 
 const BLOCKHEIGHT = 10;
 const BLOCKUNITLENGTH = 20;
@@ -16,64 +16,10 @@ type Item = {
 
 export default function createTimelinePNG(data: MyAnimeListData, path: string) {
 	const startedAnimes = data.anime.filter((anime) => anime.my_status !== STATUS.undefined && anime.my_status !== STATUS.Plan_to_Watch);
-	startedAnimes.sort((a, b) => {
-		const aStart = new Date(a.my_start_date);
-		aStart.setDate(aStart.getDate() + (((1 + 7 - aStart.getDay()) % 7) || 7));
-		const bStart = new Date(b.my_start_date);
-		bStart.setDate(bStart.getDate() + (((1 + 7 - bStart.getDay()) % 7) || 7));
-		const aEnd = new Date(a.my_finish_date);
-		aEnd.setDate(aEnd.getDate() + (((1 + 7 - aEnd.getDay()) % 7) || 7));
-		const bEnd = new Date(b.my_finish_date);
-		bEnd.setDate(bEnd.getDate() + (((1 + 7 - bEnd.getDay()) % 7) || 7));
-		return (
-			aStart.getTime() > bStart.getTime() ? 1 :
-			(aStart.getTime() === bStart.getTime() && aEnd.getTime() < bEnd.getTime() ? 1 : 
-				(aStart.getTime() === bStart.getTime() && aEnd.getTime() === bEnd.getTime() ? 0 : -1)
-			)
-		);
-	});
+	startedAnimes.sort(sortByWeeks);
 	// startedAnimes.splice(0, 2);
 
-	const mondayBeforeFirstAnime = new Date(startedAnimes.at(0)!.my_start_date);
-	mondayBeforeFirstAnime.setDate(mondayBeforeFirstAnime.getDate() + (((1 + 7 - mondayBeforeFirstAnime.getDay()) % 7) || 7) - 7);
-	const firstWeek = Math.floor(mondayBeforeFirstAnime.getTime() / (1000 * 60 * 60 * 24 * 7));
-
-	let maxY = 0;
-	const items = new Array<Item>();
-	startedAnimes.forEach((anime) => {
-		// Calculating the length of entry
-		const startWeek = new Date(anime!.my_start_date);
-		startWeek.setDate(startWeek.getDate() + (((1 + 7 - startWeek.getDay()) % 7) || 7) - 7);
-		const endWeek = new Date(anime!.my_finish_date);
-		endWeek.setDate(endWeek.getDate() + (((1 + 7 - endWeek.getDay()) % 7) || 7));
-		const length = Math.max(Math.floor(endWeek.getTime() / (1000 * 60 * 60 * 24 * 7)) - Math.floor(startWeek.getTime() / (1000 * 60 * 60 * 24 * 7)), 1);
-
-		// Calculating x pos
-		const x = Math.floor(startWeek.getTime() / (1000 * 60 * 60 * 24 * 7)) - firstWeek;
-
-		// Calculating y pos
-		const possibleY = Array.from(Array(maxY + 1).keys());
-		items.forEach((item) => {
-			if (item.x <= x && item.x + item.length > x) {
-				const index = possibleY.indexOf(item.y);
-				if (index > -1) {
-					possibleY.splice(index, 1);
-				}
-			}
-		});
-		var y = possibleY.at(0) || 0;
-		if (y === maxY) {
-			maxY++;
-		}
-			
-		items.push({
-			title: anime!.series_title,
-			status: anime!.my_status,
-			x,
-			y,
-			length
-		});
-	});
+	const items = generateItems(startedAnimes);
 
 	const image = drawImage(items);
 
@@ -84,6 +30,41 @@ export default function createTimelinePNG(data: MyAnimeListData, path: string) {
   .catch((e) => {
     console.error(`Error generating file ${path}: ${e}`);
   });
+}
+
+function generateItems(animes: AnimeInfo[]): Item[] {
+	const firstWeek = getWeek(animes.at(0)!.my_start_date);
+	return animes.reduce((items, anime) => {
+		items.push(getItem(items, anime, firstWeek));
+		return items;
+	}, new Array<Item>());
+}
+
+function getItem(items: Array<Item>, anime: AnimeInfo, firstWeek: number): Item {
+	// Calculating the length of entry
+	const startWeek = getWeek(anime.my_start_date);
+	const endWeek = getWeek(anime.my_finish_date) + 1;
+	const length = Math.max(endWeek - startWeek, 1);
+
+	// Calculating x pos
+	const x = startWeek - firstWeek;
+
+	// Calculating y pos
+	const foundY = items.reduce((foundY, item) => {
+		if (item.x <= x && item.x + item.length > x) {
+			foundY.push(item.y);
+		}
+		return foundY;
+	}, new Array<number>()).sort((a, b) => a - b);
+	for (var y = 0; y === foundY.at(y); y++) {}
+	
+	return {
+		title: anime.series_title,
+		status: anime.my_status,
+		x,
+		y,
+		length
+	}
 }
 
 function drawImage(items: Array<Item>): Bitmap {
@@ -126,4 +107,27 @@ function getColor(status: STATUS): string {
 	} else {
 		return 'purple';
 	}
+}
+
+function sortByWeeks(a: AnimeInfo, b: AnimeInfo) {
+	const aStart = new Date(a.my_start_date);
+	aStart.setDate(aStart.getDate() + (((1 + 7 - aStart.getDay()) % 7) || 7));
+	const bStart = new Date(b.my_start_date);
+	bStart.setDate(bStart.getDate() + (((1 + 7 - bStart.getDay()) % 7) || 7));
+	const aEnd = new Date(a.my_finish_date);
+	aEnd.setDate(aEnd.getDate() + (((1 + 7 - aEnd.getDay()) % 7) || 7));
+	const bEnd = new Date(b.my_finish_date);
+	bEnd.setDate(bEnd.getDate() + (((1 + 7 - bEnd.getDay()) % 7) || 7));
+	return (
+		aStart.getTime() > bStart.getTime() ? 1 :
+		(aStart.getTime() === bStart.getTime() && aEnd.getTime() < bEnd.getTime() ? 1 : 
+			(aStart.getTime() === bStart.getTime() && aEnd.getTime() === bEnd.getTime() ? 0 : -1)
+		)
+	);
+}
+
+function getWeek(date: Date): number {
+	const mondayBefore = new Date(date);
+	mondayBefore.setDate(mondayBefore.getDate() + (((1 + 7 - mondayBefore.getDay()) % 7) || 7) - 7);
+	return Math.floor(mondayBefore.getTime() / (1000 * 60 * 60 * 24 * 7));
 }
